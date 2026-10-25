@@ -57,3 +57,7 @@ python -m unittest discover -s tests -v
 ```
 
 セキュリティ上の前提と公開前の確認内容は [SECURITY.md](SECURITY.md) にあります。
+
+## ライセンス
+
+[MIT License](LICENSE)
