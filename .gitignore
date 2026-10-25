@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+.rdlint-*
+.archive-tmp-*/
+outputs/
+archives/
+成果物(保存用)/
+*.pdf
+*.png
+*.jsonl
+archive-info.json

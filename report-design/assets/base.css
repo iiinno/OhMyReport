@@ -1,0 +1,743 @@
+/* report-design base.css v0.9.0
+   報告書の唯一の CSS。値を書き換えず、そのまま <style> に埋め込む。
+   新しい色・文字サイズ・余白を足さない。足りない部品は catalog.html から選ぶ。 */
+
+/* ---------- 1. トークン ---------- */
+:root {
+  /* 面 */
+  --paper: #F3F0E7;
+  --paper-2: #E9E5D9;
+  --surface: #FFFDF8;
+
+  /* 文字 */
+  --ink: #183029;
+  --ink-2: #3D514B;
+  --muted: #52615A;
+
+  /* 罫線 */
+  --line: #BCC6BD;
+  --line-strong: #8FA097;
+
+  /* 強調。--accent は線と図形、--accent-ink は文字に使う */
+  --accent: #C2592A;
+  --accent-ink: #A84A22;
+  --accent-soft: #F3D7C7;
+
+  /* 状態。文字にも図形にも使える濃さにしてある */
+  --green: #2F6B57;
+  --green-soft: #DCEAE3;
+  --blue: #356180;
+  --blue-soft: #DCE9F0;
+  --yellow: #7E5C12;
+  --yellow-soft: #F2E8C8;
+  --red: #9A443C;
+  --red-soft: #F1D8D4;
+
+  /* グラフの主役でない棒・点 */
+  --mark: #6E7F76;
+
+  /* 書体 */
+  --font-sans: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-mono: "Cascadia Mono", "Consolas", "SFMono-Regular", "BIZ UDGothic", monospace;
+
+  /* 文字サイズと行送り（この7組以外を使わない） */
+  --type-caption: 14px;  --line-caption: 22px;
+  --type-meta: 16px;     --line-meta: 26px;
+  --type-body: 18px;     --line-body: 30px;
+  --type-lead: 24px;     --line-lead: 36px;
+  --type-h2: 32px;       --line-h2: 42px;
+  --type-h1: 48px;       --line-h1: 58px;
+  --type-metric: 64px;   --line-metric: 68px;
+
+  /* 余白（4px 単位） */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 20px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 80px;
+  --space-9: 96px;
+
+  /* 版面 */
+  --page-max: 1180px;
+  --gutter: 48px;
+}
+
+/* ---------- 2. 土台 ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--type-body);
+  line-height: var(--line-body);
+  letter-spacing: 0.02em;
+  font-kerning: normal;
+  text-autospace: normal;
+  line-break: strict;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 版面。本文の列と傍注の列を 2:1 で割る */
+.doc {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-6) 28px var(--space-9);
+  --main: calc((100% - var(--gutter)) * 2 / 3);
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+  font-feature-settings: "palt";
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+  text-spacing-trim: trim-start;
+  /* 日本語の見出しを文節の切れ目で折り返す（Chrome 119 以降）。1文節が幅を超えるときだけ途中で切る */
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+p { margin: 0; text-wrap: pretty; }
+p + p { margin-top: var(--space-3); }
+
+a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+strong { font-weight: 700; }
+
+code, kbd, samp {
+  font-family: var(--font-mono);
+  font-size: var(--type-meta);
+  letter-spacing: 0;
+}
+
+.num, time, td.num, th.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 3. 冒頭（masthead） ---------- */
+.masthead {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr;
+  column-gap: var(--gutter);
+  row-gap: var(--space-5);
+  align-items: end;
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line-strong);
+}
+.masthead.is-single { grid-template-columns: 1fr; }
+
+.kicker {
+  display: block;
+  margin-bottom: var(--space-3);
+  color: var(--ink-2);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.masthead h1 {
+  font-size: var(--type-h1);
+  line-height: var(--line-h1);
+}
+
+.abstract {
+  margin-top: var(--space-4);
+  max-width: 34em;
+  color: var(--ink-2);
+  font-size: var(--type-lead);
+  line-height: var(--line-lead);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.meta dt, .meta dd { display: inline; margin: 0; }
+.meta dt::after { content: " "; }
+.meta > div { white-space: nowrap; }
+
+/* ---------- 4. 結論 ---------- */
+.conclusion {
+  margin-top: var(--space-6);
+  max-width: var(--main);
+  padding-top: var(--space-4);
+  border-top: 3px solid var(--accent);
+}
+.conclusion .label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.conclusion p {
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+  font-size: var(--type-lead);
+  line-height: var(--line-lead);
+  font-weight: 700;
+  font-feature-settings: "palt";
+}
+.conclusion p + p {
+  font-size: var(--type-body);
+  line-height: var(--line-body);
+  font-weight: 400;
+  font-feature-settings: normal;
+  color: var(--ink-2);
+}
+
+/* ---------- 5. 数値 ---------- */
+.metric {
+  display: block;
+}
+.metric .value {
+  display: block;
+  font-size: var(--type-metric);
+  line-height: var(--line-metric);
+  font-weight: 700;
+  font-feature-settings: "palt";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.metric .unit {
+  margin-left: 0.08em;
+  font-size: var(--type-h1);
+}
+.metric .label {
+  display: block;
+  margin-top: var(--space-2);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+  font-weight: 700;
+}
+.metric .context {
+  display: block;
+  color: var(--muted);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+.metric.is-key .value { color: var(--accent); }
+
+/* 補助の数値は罫線の帯に並べる。箱で囲まない */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8em, 1fr));
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.stats > div {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+}
+.stats dt {
+  color: var(--muted);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+.stats dd {
+  margin: 0;
+  order: -1;
+  font-size: var(--type-lead);
+  line-height: var(--line-lead);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.stats > div { display: flex; flex-direction: column; }
+
+/* ---------- 6. セクション ---------- */
+.sec {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line-strong);
+}
+.sec.is-break { margin-top: var(--space-8); }
+.sec::after { content: ""; display: block; clear: both; }
+
+.sec > h2 {
+  max-width: none;
+  margin-bottom: var(--space-5);
+  font-size: var(--type-h2);
+  line-height: var(--line-h2);
+}
+.sec h3 {
+  max-width: var(--main);
+  margin: var(--space-5) 0 var(--space-3);
+  font-size: var(--type-lead);
+  line-height: var(--line-lead);
+}
+
+/* 本文の列。42 全角字を超えない */
+.sec > p,
+.sec > ul,
+.sec > ol:not(.findings),
+.sec > .note {
+  max-width: min(var(--main), 42em);
+}
+.sec > ul, .sec > ol:not(.findings) { padding-left: 1.4em; margin: var(--space-3) 0; }
+.sec li + li { margin-top: var(--space-1); }
+
+/* 幅いっぱいを使う要素 */
+.wide,
+.sec > figure,
+.sec > table,
+.sec > .findings,
+.sec > .split,
+.sec > .log,
+.sec > pre {
+  clear: both;
+  margin-top: var(--space-5);
+}
+
+/* ---------- 7. 傍注（右余白の注） ---------- */
+/* 注をつける段落の直前に置く。右の列へ浮かせ、色線の枠は使わない */
+.side {
+  float: right;
+  clear: right;
+  width: calc((100% - var(--gutter)) / 3);
+  margin: 0 0 var(--space-4);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.side .label,
+.note .label {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--ink);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.side p + p { margin-top: var(--space-2); }
+
+/* 本文の流れの中に置く注。左の色線は使わず、上下の罫線と見出し語で区切る */
+.note {
+  margin: var(--space-5) 0;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+  color: var(--ink-2);
+}
+.note[data-kind="warn"] .label,
+.side[data-kind="warn"] .label { color: var(--yellow); }
+.note[data-kind="error"] .label,
+.side[data-kind="error"] .label { color: var(--red); }
+
+/* ---------- 8. 状態・確度 ---------- */
+/* 文言と色の両方で示す。丸いピルにしない */
+.status {
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: inherit;
+}
+.status::before {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.35em;
+  vertical-align: 0.08em;
+  background: currentColor;
+}
+.status.is-ok { color: var(--green); }
+.status.is-info { color: var(--blue); }
+.status.is-warn { color: var(--yellow); }
+.status.is-error { color: var(--red); }
+.status.is-unknown { color: var(--muted); }
+.status.is-unknown::before { background: none; outline: 1.5px solid currentColor; outline-offset: -1.5px; }
+
+/* ---------- 9. 発見の一覧 ---------- */
+.findings {
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.findings > li {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  column-gap: var(--gutter);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--line);
+}
+.findings > li:last-child { border-bottom: 1px solid var(--line); }
+.findings h3 {
+  margin: 0 0 var(--space-2);
+  max-width: none;
+  font-size: var(--type-body);
+  line-height: var(--line-body);
+}
+.findings .evidence {
+  color: var(--muted);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.findings > li.is-primary h3 {
+  font-size: var(--type-lead);
+  line-height: var(--line-lead);
+}
+
+/* ---------- 10. 並べる構図 ---------- */
+.split {
+  display: grid;
+  column-gap: var(--gutter);
+  row-gap: var(--space-5);
+  align-items: start;
+}
+.split.is-equal { grid-template-columns: 1fr 1fr; }
+.split.is-golden { grid-template-columns: 1.618fr 1fr; }
+.split.is-two { grid-template-columns: 2fr 1fr; }
+.split.is-golden.is-reverse { grid-template-columns: 1fr 1.618fr; }
+.split.is-two.is-reverse { grid-template-columns: 1fr 2fr; }
+.split > * { min-width: 0; }
+.split h3 { margin-top: 0; }
+
+/* ---------- 11. 表 ---------- */
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+  font-variant-numeric: tabular-nums;
+}
+table.is-dense {
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+caption {
+  caption-side: top;
+  padding-bottom: var(--space-2);
+  text-align: left;
+  color: var(--ink-2);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 700;
+}
+th, td {
+  padding: var(--space-2) var(--space-3) var(--space-2) 0;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+thead th {
+  color: var(--ink-2);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 700;
+  border-bottom: 1px solid var(--line-strong);
+}
+tbody th { font-weight: 700; }
+tbody tr { border-bottom: 1px solid var(--line); }
+th.num, td.num { text-align: right; padding-right: var(--space-4); white-space: nowrap; }
+td code { font-size: inherit; }
+/* 識別子は名前の下に小さく置く。途中で折り返さない */
+td .id, th .id {
+  display: block;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  font-weight: 400;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+}
+td .key { color: var(--accent-ink); font-weight: 700; }
+
+/* ---------- 12. 図 ---------- */
+figure { margin: 0; }
+figure.fig > svg {
+  display: block;
+  width: 100%;
+  max-width: 880px;
+  height: auto;
+}
+figcaption {
+  margin-top: var(--space-3);
+  max-width: 42em;
+  color: var(--muted);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+figcaption b { color: var(--ink-2); }
+
+/* SVG の中の文字と線。viewBox の幅は 880 にし、文字は 16 を基本にする */
+.fig svg text { font-family: var(--font-sans); fill: var(--ink); }
+.fig svg .t-label { font-size: 16px; font-weight: 700; }
+.fig svg .t-sub { font-size: 16px; fill: var(--ink-2); }
+.fig svg .t-note { font-size: 16px; fill: var(--muted); }
+.fig svg .node { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1.5; }
+.fig svg .node.is-key { fill: var(--accent-soft); stroke: var(--accent); }
+.fig svg .node.is-ok { fill: var(--green-soft); stroke: var(--green); }
+.fig svg .edge { fill: none; stroke: var(--mark); stroke-width: 1.5; }
+.fig svg .edge.is-key { stroke: var(--accent); stroke-width: 2; }
+.fig svg .edge.is-fail { stroke: var(--red); stroke-dasharray: 6 4; }
+.fig svg .arrow { fill: var(--mark); }
+.fig svg .arrow.is-key { fill: var(--accent); }
+
+/* 幅の狭い画面では SVG の代わりに文字の版を出す */
+.only-narrow { display: none; }
+
+/* ---------- 13. 横棒グラフ（HTML） ---------- */
+.bars {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bars > li {
+  display: grid;
+  grid-template-columns: 9em 1fr 5em;
+  column-gap: var(--space-3);
+  align-items: center;
+  min-height: 30px;
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.bars .name { overflow-wrap: anywhere; }
+.bars .track { height: 14px; background: var(--paper-2); }
+.bars .bar { display: block; height: 100%; width: var(--v); background: var(--mark); }
+.bars .val { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bars > li.is-key .bar { background: var(--accent); }
+.bars > li.is-key .name,
+.bars > li.is-key .val { font-weight: 700; }
+
+/* ---------- 14. 点グラフ（HTML）。目盛りと基準線を必ず出す ---------- */
+.dots {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  --lo: 0;
+  --hi: 1;
+}
+.dots > li {
+  display: grid;
+  grid-template-columns: 9em 1fr 5em;
+  column-gap: var(--space-3);
+  align-items: center;
+  min-height: 30px;
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.dots .axis {
+  position: relative;
+  height: 20px;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+}
+.dots .axis::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--line);
+}
+.dots .ref {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc((var(--r) - var(--lo)) / (var(--hi) - var(--lo)) * 100%);
+  border-left: 1px dashed var(--line-strong);
+}
+.dots .dot {
+  position: absolute;
+  top: 50%;
+  left: calc((var(--v) - var(--lo)) / (var(--hi) - var(--lo)) * 100%);
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--mark);
+}
+.dots .range {
+  position: absolute;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  left: calc((var(--a) - var(--lo)) / (var(--hi) - var(--lo)) * 100%);
+  right: calc(100% - (var(--b) - var(--lo)) / (var(--hi) - var(--lo)) * 100%);
+  background: var(--mark);
+}
+.dots > li.is-key .dot { background: var(--accent); }
+.dots > li.is-key .name,
+.dots > li.is-key .val { font-weight: 700; }
+.dots .val { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dots > li.scale {
+  min-height: 0;
+  color: var(--muted);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+.dots > li.scale .ticks { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+
+/* ---------- 15. 時系列の記録 ---------- */
+.log {
+  margin: 0;
+  padding: 0;
+}
+.log > div {
+  display: grid;
+  grid-template-columns: 9em 1fr 2fr;
+  column-gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+.log > div:last-child { border-bottom: 1px solid var(--line); }
+.log dt {
+  color: var(--muted);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+  font-variant-numeric: tabular-nums;
+}
+.log dt b { display: block; color: var(--ink); font-size: var(--type-body); line-height: var(--line-body); }
+.log dd { margin: 0; }
+.log dd.event { font-weight: 700; }
+.log > div.is-key dd.event { color: var(--accent-ink); }
+
+/* ---------- 16. コード ---------- */
+pre {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--paper-2);
+  font-family: var(--font-mono);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+  letter-spacing: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+pre code { font-size: inherit; }
+
+details { margin-top: var(--space-5); }
+details > summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+  font-weight: 700;
+}
+
+/* ---------- 17. 出典と奥付 ---------- */
+.cite { font-size: var(--type-caption); vertical-align: super; line-height: 0; }
+.cite a { text-decoration: none; }
+.sources {
+  margin: var(--space-4) 0 0;
+  padding-left: 2em;
+  color: var(--ink-2);
+  font-size: var(--type-meta);
+  line-height: var(--line-meta);
+}
+.sources li { overflow-wrap: anywhere; }
+
+.colophon {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-8);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--type-caption);
+  line-height: var(--line-caption);
+}
+
+/* ---------- 18. 幅の狭い画面 ---------- */
+@media screen and (max-width: 760px) {
+  .doc { padding: 22px 16px var(--space-7); --main: 100%; }
+  .masthead, .split, .findings > li { grid-template-columns: 1fr !important; }
+  .masthead h1 { font-size: 40px; line-height: 48px; }
+  .abstract { font-size: var(--type-body); line-height: var(--line-body); }
+  .sec { margin-top: var(--space-6); }
+  .sec > h2 { font-size: var(--type-lead); line-height: var(--line-lead); }
+  .side {
+    float: none;
+    width: auto;
+    margin: var(--space-4) 0;
+  }
+  .metric .value { font-size: var(--type-h1); line-height: var(--line-h1); }
+  .metric .unit { font-size: 40px; }
+  .bars > li, .dots > li { grid-template-columns: 6em 1fr 4em; }
+  .log > div { grid-template-columns: 1fr; row-gap: var(--space-1); }
+  .only-wide { display: none !important; }
+  .only-narrow { display: block !important; }
+
+  /* 表は列を縦に積む。data-label に列名を書いておく */
+  table.is-stack thead { display: none; }
+  table.is-stack, table.is-stack tbody, table.is-stack tr, table.is-stack td, table.is-stack th { display: block; width: auto; }
+  table.is-stack tr { padding: var(--space-2) 0; }
+  table.is-stack td, table.is-stack tbody th { padding: 0; text-align: left; }
+  table.is-stack td::before {
+    content: attr(data-label) " ";
+    color: var(--muted);
+    font-size: var(--type-caption);
+  }
+}
+
+/* ---------- 19. 印刷と PDF ---------- */
+@page {
+  size: A4;
+  margin: 16mm 14mm 18mm;
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-family: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", sans-serif;
+    font-size: 9pt;
+    color: #52615A;
+  }
+}
+
+@media print {
+  :root {
+    --type-caption: 9pt;  --line-caption: 14pt;
+    --type-meta: 9.5pt;   --line-meta: 15pt;
+    --type-body: 10.5pt;  --line-body: 17pt;
+    --type-lead: 13pt;    --line-lead: 20pt;
+    --type-h2: 18pt;      --line-h2: 24pt;
+    --type-h1: 28pt;      --line-h1: 36pt;
+    --type-metric: 36pt;  --line-metric: 40pt;
+    --gutter: 8mm;
+  }
+  html, body { background: var(--paper); }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .doc { max-width: none; padding: 0; }
+  .masthead h1 { font-size: var(--type-h1); line-height: var(--line-h1); }
+  .sec { margin-top: 10mm; }
+  .sec.is-break { break-before: page; margin-top: 0; }
+  h1, h2, h3, .kicker, caption { break-after: avoid-page; }
+  p { widows: 2; orphans: 2; }
+  figure, .conclusion, .findings > li, .note, .side, .split.is-equal, tr { break-inside: avoid; }
+  thead { display: table-header-group; }
+  a { color: var(--ink); text-decoration: none; }
+  .only-narrow { display: none !important; }
+  .only-wide { display: block !important; }
+}

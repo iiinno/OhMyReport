@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>検索パイプライン検証結果</title>
+<!-- 部品見本。提出する報告書では、この link の代わりに base.css の全文を <style> に入れる -->
+<link rel="stylesheet" href="base.css">
+</head>
+<body>
+<main class="doc">
+
+  <!-- 部品: 冒頭。左に題と要旨、右に主役の数値を1つ。比率は 1.618:1 -->
+  <header class="masthead">
+    <div>
+      <span class="kicker">検証</span>
+      <h1>検索パイプライン検証結果</h1>
+      <p class="abstract">検索・取得・抽出の4ツールを5回ずつ反復実行した。基本機能は動いたが、成功判定と結果の保持に食い違いが残った。</p>
+      <dl class="meta">
+        <div><dt>実施</dt><dd><time datetime="2026-10-12">2026年10月12日</time></dd></div>
+        <div><dt>環境</dt><dd>VPS 2 vCPU / 4 GB</dd></div>
+        <div><dt>対象</dt><dd>20 クエリ × 5 回</dd></div>
+      </dl>
+    </div>
+    <div class="metric is-key">
+      <span class="value">67<span class="unit">%</span></span>
+      <span class="label">検索結果の重複率</span>
+      <span class="context">上位10件の URL が前回と一致した割合</span>
+    </div>
+  </header>
+
+  <!-- 部品: 結論。上に強調色の太い罫線を1本引くだけで、枠や塗りは使わない -->
+  <div class="conclusion">
+    <span class="label">結論</span>
+    <p>成功の判定は、HTTP の状態より先に処理全体の状態を見る必要がある。</p>
+    <p>20回中3回、本体がエラーで止まったのに途中までの回答が成功として返った。取得の速さは十分なので、直す対象は速度ではなく判定の順序である。</p>
+  </div>
+
+  <!-- 部品: 補助の数値。罫線の帯に並べ、箱で囲まない -->
+  <dl class="stats">
+    <div><dt>反復回数</dt><dd>5 回</dd></div>
+    <div><dt>取得の中央値</dt><dd>0.17 s</dd></div>
+    <div><dt>抽出の中央値</dt><dd>8.34 s</dd></div>
+    <div><dt>成功表示の食い違い</dt><dd>3 / 20</dd></div>
+  </dl>
+
+  <!-- 部品: 構造図。SVG の viewBox 幅は 880、文字は 16。狭い画面では下の ol を出す -->
+  <section class="sec">
+    <h2>抽出が処理時間の大半を占める</h2>
+    <p>1回の問い合わせは4段階を順に通る。抽出の段階だけで全体の約7割の時間を使い、本文が空のときは取得からやり直す。</p>
+    <figure class="fig">
+      <svg class="only-wide" viewBox="0 0 880 236" role="img" aria-label="入力、検索、取得、抽出、回答の順に処理が進む。抽出は8.34秒で最も遅く、本文が空なら取得へ戻る。">
+        <rect class="node" x="8" y="40" width="136" height="76"/>
+        <text class="t-label" x="24" y="72">入力</text>
+        <text class="t-sub" x="24" y="98">クエリ</text>
+
+        <path class="edge" d="M148 78 H172"/>
+        <polygon class="arrow" points="180,78 170,73 170,83"/>
+
+        <rect class="node" x="184" y="40" width="136" height="76"/>
+        <text class="t-label" x="200" y="72">検索</text>
+        <text class="t-sub" x="200" y="98">1.08 s</text>
+
+        <path class="edge" d="M324 78 H348"/>
+        <polygon class="arrow" points="356,78 346,73 346,83"/>
+
+        <rect class="node" x="360" y="40" width="136" height="76"/>
+        <text class="t-label" x="376" y="72">取得</text>
+        <text class="t-sub" x="376" y="98">0.17 s</text>
+
+        <path class="edge is-key" d="M500 78 H524"/>
+        <polygon class="arrow is-key" points="532,78 522,73 522,83"/>
+
+        <rect class="node is-key" x="536" y="40" width="136" height="76"/>
+        <text class="t-label" x="552" y="72">抽出</text>
+        <text class="t-sub" x="552" y="98">8.34 s</text>
+
+        <path class="edge" d="M676 78 H700"/>
+        <polygon class="arrow" points="708,78 698,73 698,83"/>
+
+        <rect class="node" x="712" y="40" width="136" height="76"/>
+        <text class="t-label" x="728" y="72">回答</text>
+        <text class="t-sub" x="728" y="98">要約</text>
+
+        <path class="edge is-fail" d="M604 116 V170 H428 V130"/>
+        <polygon class="arrow" points="428,120 423,130 433,130"/>
+        <text class="t-note" x="440" y="200">本文が空なら取得をやり直す</text>
+      </svg>
+      <ol class="only-narrow">
+        <li>入力（クエリ）</li>
+        <li>検索 1.08 s</li>
+        <li>取得 0.17 s</li>
+        <li><b>抽出 8.34 s</b>。本文が空なら取得へ戻る</li>
+        <li>回答（要約）</li>
+      </ol>
+      <figcaption><b>図1</b> 処理の流れと各段階の中央値。破線は失敗したときの戻り道。</figcaption>
+    </figure>
+  </section>
+
+  <!-- 部品: 横棒グラフ → 完全な表。傍注は注をつける段落の直前に置く -->
+  <section class="sec">
+    <h2>4ツールの処理時間を5回の中央値で比べる</h2>
+    <aside class="side">
+      <span class="label">測り方</span>
+      <p>各ツールを5周、計20回を逐次実行した。並列に動かしたときの値ではない。</p>
+    </aside>
+    <p>抽出は取得の約50倍遅い。取得と検索は2秒以内に収まり、利用者の待ち時間を左右するのは抽出だけである。</p>
+    <p>クローラーの回避処理は5回中1回失敗し、そのときだけ4秒を超えた。</p>
+    <figure class="fig">
+      <ol class="bars">
+        <li><span class="name">取得</span><span class="track"><span class="bar" style="--v: 2%"></span></span><span class="val">0.17 s</span></li>
+        <li><span class="name">検索</span><span class="track"><span class="bar" style="--v: 13%"></span></span><span class="val">1.08 s</span></li>
+        <li><span class="name">回避</span><span class="track"><span class="bar" style="--v: 40%"></span></span><span class="val">3.37 s</span></li>
+        <li class="is-key"><span class="name">抽出</span><span class="track"><span class="bar" style="--v: 100%"></span></span><span class="val">8.34 s</span></li>
+      </ol>
+      <figcaption><b>図2</b> 処理時間の中央値。棒の長さは値に比例し、0 から始まる。</figcaption>
+    </figure>
+    <table>
+      <caption>表1 5回の測定値</caption>
+      <colgroup><col style="width: 32%"><col><col><col><col></colgroup>
+      <thead>
+        <tr><th scope="col">ツール</th><th scope="col" class="num">中央値</th><th scope="col" class="num">最小</th><th scope="col" class="num">最大</th><th scope="col" class="num">失敗</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">取得 <span class="id">vps_fetch</span></th><td class="num">0.17 s</td><td class="num">0.15 s</td><td class="num">0.21 s</td><td class="num">0</td></tr>
+        <tr><th scope="row">検索 <span class="id">vps_search</span></th><td class="num">1.08 s</td><td class="num">0.99 s</td><td class="num">1.32 s</td><td class="num">0</td></tr>
+        <tr><th scope="row">回避 <span class="id">vps_cloak</span></th><td class="num">3.37 s</td><td class="num">2.90 s</td><td class="num">4.45 s</td><td class="num">1</td></tr>
+        <tr><th scope="row">抽出 <span class="id">vps_extract</span></th><td class="num">8.34 s</td><td class="num">7.12 s</td><td class="num">9.80 s</td><td class="num">2</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 部品: 発見の一覧。罫線で区切り、重要な1件だけ見出しを大きくする。右の列は根拠と確度 -->
+  <section class="sec">
+    <h2>成功表示と処理全体の状態が一致しない</h2>
+    <p>見つかった問題は3件。1件目は誤った回答を利用者へ届けるため、ほかの2件より先に直す。</p>
+    <ol class="findings">
+      <li class="is-primary">
+        <div>
+          <h3>本体がエラーでも、途中の回答が成功として返る</h3>
+          <p>HTTP 200 を受け取った時点で成功と判定しており、その後の抽出の失敗を見ていない。</p>
+        </div>
+        <p class="evidence"><span class="status is-ok">実測</span><br>20回中3回。記録 run-0412 の 7、11、18 回目。</p>
+      </li>
+      <li>
+        <div>
+          <h3>21件目以降の古い結果が切り詰められる</h3>
+          <p>保持の上限が20件で、超えた分を警告なしに捨てている。</p>
+        </div>
+        <p class="evidence"><span class="status is-ok">実測</span><br>20回の反復で、19回目から欠けた。</p>
+      </li>
+      <li>
+        <div>
+          <h3>取得が速くても、本文の正しさは保証されない</h3>
+          <p>0.17 秒で返った応答の一部は、本文ではなく同意画面だった。</p>
+        </div>
+        <p class="evidence"><span class="status is-warn">推定</span><br>目視で2件確認。全件は調べていない。</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 部品: 点グラフ。目盛りの行と基準の破線を必ず出す -->
+  <section class="sec">
+    <h2>重複率はクエリの種類で 40 ポイント差がある</h2>
+    <p>ニュースは同じ記事が繰り返し上位に来る。論文は重複が少なく、検索を増やす効果が大きい。</p>
+    <figure class="fig">
+      <ul class="dots" style="--lo: 0; --hi: 100">
+        <li class="is-key"><span class="name">ニュース</span><span class="axis"><span class="ref" style="--r: 67"></span><span class="dot" style="--v: 81"></span></span><span class="val">81%</span></li>
+        <li><span class="name">技術文書</span><span class="axis"><span class="ref" style="--r: 67"></span><span class="dot" style="--v: 72"></span></span><span class="val">72%</span></li>
+        <li><span class="name">製品比較</span><span class="axis"><span class="ref" style="--r: 67"></span><span class="dot" style="--v: 64"></span></span><span class="val">64%</span></li>
+        <li><span class="name">論文</span><span class="axis"><span class="ref" style="--r: 67"></span><span class="dot" style="--v: 41"></span></span><span class="val">41%</span></li>
+        <li class="scale"><span></span><span class="ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span></span><span></span></li>
+      </ul>
+      <figcaption><b>図3</b> クエリの種類ごとの重複率。破線は全体の 67%。</figcaption>
+    </figure>
+  </section>
+
+  <!-- 部品: 同格の比較。1:1 で左右を同じ形にし、差は中身で見せる -->
+  <section class="sec">
+    <h2>成功判定は処理全体の状態を先に確認する</h2>
+    <div class="split is-equal">
+      <div>
+        <h3>現在の判定</h3>
+        <ol>
+          <li>HTTP の状態が 200 か</li>
+          <li>回答の文字列があるか</li>
+        </ol>
+      </div>
+      <div>
+        <h3>変更後の判定</h3>
+        <ol>
+          <li>処理全体の状態が完了か</li>
+          <li>HTTP の状態が 200 か</li>
+          <li>回答の文字列があるか</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- 部品: 時系列の記録。生のログは details に畳む -->
+  <section class="sec">
+    <h2>3回目の失敗は抽出の時間切れから始まった</h2>
+    <dl class="log">
+      <div><dt><b>14:04:58</b>7回目</dt><dd class="event">抽出が開始</dd><dd>取得した本文 12,480 字を渡した。</dd></div>
+      <div class="is-key"><dt><b>14:05:28</b>7回目</dt><dd class="event">抽出が時間切れ</dd><dd>30 秒の上限に達し、処理全体の状態がエラーになった。</dd></div>
+      <div><dt><b>14:05:28</b>7回目</dt><dd class="event">成功として返却</dd><dd>途中までの要約と HTTP 200 が利用者へ返った。</dd></div>
+    </dl>
+    <details>
+      <summary>記録 run-0412 の該当行</summary>
+      <pre><code>2026-10-12 14:04:58 INFO extract start (chars=12480)
+2026-10-12 14:05:28 WARN extract timeout (limit=30s) run_state=error
+2026-10-12 14:05:28 INFO respond status=200 partial=true</code></pre>
+    </details>
+  </section>
+
+  <!-- 部品: 制約。流れの中の注は上下の罫線と見出し語で区切る。確度は状態ラベルで示す -->
+  <section class="sec">
+    <h2>この測定では高負荷時の性能を確認できない</h2>
+    <p>測定は1本ずつ逐次で行った。同時に複数の問い合わせが来たときの待ち時間と失敗率は、別に測る必要がある。</p>
+    <div class="note" data-kind="warn">
+      <span class="label">適用できない範囲</span>
+      <p>1 MB を超える本文、ログインが必要なページ、動画のページは測定に含めていない。</p>
+    </div>
+    <table>
+      <caption>表2 主張ごとの確度</caption>
+      <colgroup><col style="width: 50%"><col style="width: 22%"><col></colgroup>
+      <thead>
+        <tr><th scope="col">主張</th><th scope="col">確度</th><th scope="col">根拠</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>成功表示と状態が食い違う</td><td><span class="status is-ok">実測</span></td><td>run-0412</td></tr>
+        <tr><td>古い結果が切り詰められる</td><td><span class="status is-ok">実測</span></td><td>run-0412</td></tr>
+        <tr><td>同意画面を本文として取得する</td><td><span class="status is-warn">推定</span></td><td>目視 2 件</td></tr>
+        <tr><td>高負荷時も同じ傾向になる</td><td><span class="status is-unknown">未確認</span></td><td>測定なし</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 部品: 出典と奥付 -->
+  <section class="sec">
+    <h2>集計値を再生成する手順と出典</h2>
+    <p>表1の値は、記録ファイルから次のコマンドで再生成できる<span class="cite"><a href="#src1">[1]</a></span>。</p>
+    <pre><code>python tools/summarize.py logs/run-0412.jsonl --by tool --stat median,min,max</code></pre>
+    <ol class="sources">
+      <li id="src1">logs/run-0412.jsonl（2026年10月12日 14:00〜15:10 の20回分）</li>
+      <li id="src2">tools/summarize.py（集計に使ったスクリプト）</li>
+    </ol>
+  </section>
+
+  <footer class="colophon">
+    <span>検索パイプライン検証結果</span>
+    <span>2026年10月12日 作成</span>
+  </footer>
+
+</main>
+</body>
+</html>
